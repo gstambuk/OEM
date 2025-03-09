@@ -28,6 +28,7 @@ for /f "tokens=*" %%B in ('dir /b /o:n *.ps1') do (
 mkdir %windir%\Setup\Scripts
 copy /y GShield.ps1 %windir%\Setup\Scripts\GShield.ps1
 schtasks /create /tn "GShield" /xml "GShield.xml" /f
+copy /y BlockAds.pac %windir%\Setup\Scripts\BlockAds.pac
 
 :: Step 8: Execute Registry (.reg) files
 reg import GSecurity.reg
