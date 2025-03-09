@@ -1,7 +1,7 @@
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings]
-"AutoConfigURL"="https://raw.githubusercontent.com/gszd79/Scripts/refs/heads/main/Pac/BlockAds.pac"
+"AutoConfigURL"="file://C:\\Windows\\Setup\\Scripts\\BlockAds.pac"
 
 [HKEY_CURRENT_USER\Control Panel\Desktop]
 "HungAppTimeout"="1000"
