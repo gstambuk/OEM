@@ -40,12 +40,12 @@ reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v "DisableDomainCreds" /t R
 :: Script execution
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& {Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass}"
 
-REM Remove default user
+:: Remove default user
 net user defaultuser0 /delete
 net user defaultuser1 /delete
 net user defaultuser100000 /delete
 
-REM Perms
+:: Perms
 for %%d in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     if exist %%d:\ (
         takeown /f %%d:\
@@ -98,7 +98,7 @@ icacls "%USERPROFILE%\Desktop" /inheritance:d /T /C
 icacls "%USERPROFILE%\Desktop" /remove "System"
 icacls "%USERPROFILE%\Desktop" /remove "Administrators"
 
-REM Remove symbolic links
+:: Remove symbolic links
 for %%D in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     if exist "%%D:\" (
         for /f "delims=" %%F in ('dir /aL /s /b "%%D:\" 2^>nul') do (
@@ -108,7 +108,7 @@ for %%D in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     )
 )
 
-REM Loop through all network adapters and apply the DisablePXE setting
+:: Loop through all network adapters and apply the DisablePXE setting
 for /f "tokens=*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" /s /f "Name" /k 2^>nul') do (
     set "adapter=%%A"
     REM Extract the adapter GUID from the registry key path
@@ -135,14 +135,54 @@ for /f "tokens=*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSe
     )
 )
 
-REM disable netbios
+:: disable netbios
 sc config lmhosts start= disabled
 @powershell.exe -ExecutionPolicy Bypass -Command "Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true } | ForEach-Object { $_.SetTcpipNetbios(2) }"
 wmic nicconfig where TcpipNetbiosOptions=0 call SetTcpipNetbios 2
 wmic nicconfig where TcpipNetbiosOptions=1 call SetTcpipNetbios 2
 reg add "HKLM\System\CurrentControlSet\Services\Dnscache\Parameters" /v "EnableNetbios" /t REG_DWORD /d "0" /f
 
-REM takeown of group policy client service
+:: takeown of group policy client service
 SetACL.exe -on "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\gpsvc" -ot reg -actn setowner -ownr n:Administrators
 SetACL.exe -on "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\gpsvc" -ot reg -actn ace -ace "n:Administrators;p:full"
 sc stop gpsvc
+
+:: Enumerate all subkeys under CurrentControlSet\Services
+for /f "tokens=*" %%i in ('reg query "HKLM\SYSTEM\CurrentControlSet\Services"') do (
+    :: Extract the subkey name
+    set "key=%%i"
+    if "!key!" NEQ "" (
+        :: Skip the root key itself
+        if "!key!" NEQ "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services" (
+            echo Processing: !key!
+            :: Add the registry value
+            reg add "!key!" /v "SvcHostSplitDisable" /t REG_DWORD /d 1 /f >nul 2>&1
+            if !errorlevel! EQU 0 (
+                echo Successfully updated !key!
+            ) else (
+                echo Failed to update !key!
+            )
+        )
+    )
+)
+
+:: Services stop and disable
+sc SSDPSRV start= disabled
+sc upnphost start= disabled
+sc NetBT start= disabled
+sc BTHMODEM start= disabled
+sc gpsvc start= disabled
+sc LanmanWorkstation start= disabled
+sc LanmanServer start= disabled
+sc seclogon start= disabled
+sc Messenger start= disabled
+
+sc stop SSDPSRV
+sc stop upnphost
+sc stop NetBT
+sc stop BTHMODEM
+sc stop gpsvc
+sc stop LanmanWorkstation
+sc stop LanmanServer
+sc stop seclogon
+sc stop Messenger
