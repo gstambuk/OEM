@@ -52,6 +52,7 @@ for %%d in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
         icacls %%d:\ /grant:r "Console Logon":M
         icacls %%d:\ /remove "Everyone"
         icacls %%d:\ /remove "Authenticated Users"
+        icacls %%d:\ /remove "Users"
     )
 )
 
@@ -73,6 +74,7 @@ for %%e in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
                 icacls %%e:\ /grant:r "Console Logon":M
                 icacls %%e:\ /remove "Everyone"
                 icacls %%e:\ /remove "Authenticated Users"
+	        icacls %%e:\ /remove "Users"
             ) else (
                 echo %%e:\ is removable but not NTFS formatted.
             )
