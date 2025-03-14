@@ -19,22 +19,22 @@ for /f "tokens=*" %%B in ('dir /b /o:n *.ps1') do (
     powershell -ExecutionPolicy Bypass -File "%%B"
 )
 
-:: Step 6: Execute Registry (.reg) files alphabetically
-for /f "tokens=*" %%R in ('dir /b /o:n *.reg') do (
-    reg import "%%R"
-)
-
-:: Step 7: Resident Protection
+:: Step 6: Resident Protection
 mkdir %windir%\Setup\Scripts
 copy /y GSecurity.ps1 %windir%\Setup\Scripts\GSecurity.ps1
 schtasks /create /tn "GSecurity" /xml "GSecurity.xml" /ru "SYSTEM"
 
-:: Step 8: Ram Cleaner
+:: Step 7: Ram Cleaner
 copy /y emptystandbylist.exe %windir%\Setup\Scripts\emptystandbylist.exe
 copy /y RamCleaner.bat %windir%\Setup\Scripts\RamCleaner.bat
 schtasks /create /tn "RamCleaner" /xml "RamCleaner.xml" /ru "SYSTEM"
 
-:: Step 9: Execute CMD (.cmd) files alphabetically
+:: Step 8: Execute CMD (.cmd) files alphabetically
 for /f "tokens=*" %%A in ('dir /b /o:n *.cmd') do (
     call "%%A"
+)
+
+:: Step 9: Execute Registry (.reg) files alphabetically
+for /f "tokens=*" %%R in ('dir /b /o:n *.reg') do (
+    reg import "%%R"
 )
