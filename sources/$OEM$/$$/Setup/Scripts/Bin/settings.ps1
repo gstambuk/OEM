@@ -4,10 +4,10 @@ function Harden-PrivilegeRights {
 [Privilege Rights]
 SeDenyNetworkLogonRight = *S-1-5-11
 SeDenyRemoteInteractiveLogonRight = *S-1-5-11
-SeNetworkLogonRight =
-SeRemoteShutdownPrivilege =
-SeDebugPrivilege =
-SeRemoteInteractiveLogonRight =
+SeNetworkLogonRight=
+SeRemoteShutdownPrivilege=
+SeDebugPrivilege=
+SeRemoteInteractiveLogonRight=
 '@
 
     # Consider using a more secure temporary path
