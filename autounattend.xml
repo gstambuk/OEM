@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
-	<!--https://schneegans.de/windows/unattend-generator/?LanguageMode=Interactive&ProcessorArchitecture=x86&ProcessorArchitecture=amd64&ProcessorArchitecture=arm64&BypassRequirementsCheck=true&BypassNetworkCheck=true&UseConfigurationSet=true&HidePowerShellWindows=true&ComputerNameMode=Custom&ComputerName=WINDOWS-PC&CompactOsMode=Default&TimeZoneMode=Implicit&PartitionMode=Interactive&WindowsEditionMode=Interactive&UserAccountMode=Unattended&AccountName0=Admin&AccountDisplayName0=&AccountPassword0=&AccountGroup0=Administrators&AccountName1=&AccountName2=&AccountName3=&AccountName4=&AutoLogonMode=Own&PasswordExpirationMode=Unlimited&LockoutMode=Disabled&HideFiles=HiddenSystem&ShowFileExtensions=true&ClassicContextMenu=true&LaunchToThisPC=true&ShowEndTask=true&TaskbarSearch=Label&TaskbarIconsMode=Default&ShowAllTrayIcons=true&DisableBingResults=true&StartTilesMode=Empty&StartPinsMode=Empty&DisableWindowsUpdate=true&DisableFastStartup=true&EnableLongPaths=true&EnableRemoteDesktop=true&HardenSystemDriveAcl=true&AllowPowerShellScripts=true&PreventAutomaticReboot=true&TurnOffSystemSounds=true&PreventDeviceEncryption=true&HideEdgeFre=true&MakeEdgeUninstallable=true&DeleteWindowsOld=true&EffectsMode=Appearance&DesktopIconsMode=Default&WifiMode=Skip&ExpressSettings=EnableAll&KeysMode=Skip&ColorMode=Custom&SystemColorTheme=Dark&AppsColorTheme=Dark&AccentColor=%23000000&AccentColorOnStart=true&AccentColorOnBorders=true&EnableTransparency=true&WallpaperMode=Solid&WallpaperColor=%23000000&RestartExplorer=true&WdacMode=Skip-->
 	<settings pass="offlineServicing"></settings>
 	<settings pass="windowsPE">
 		<component name="Microsoft-Windows-Setup" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -11,7 +10,7 @@
 				</ProductKey>
 				<AcceptEula>true</AcceptEula>
 			</UserData>
-			<UseConfigurationSet>true</UseConfigurationSet>
+			<UseConfigurationSet>false</UseConfigurationSet>
 			<RunSynchronous>
 				<RunSynchronousCommand wcm:action="add">
 					<Order>1</Order>
@@ -35,7 +34,7 @@
 				</ProductKey>
 				<AcceptEula>true</AcceptEula>
 			</UserData>
-			<UseConfigurationSet>true</UseConfigurationSet>
+			<UseConfigurationSet>false</UseConfigurationSet>
 			<RunSynchronous>
 				<RunSynchronousCommand wcm:action="add">
 					<Order>1</Order>
@@ -59,7 +58,7 @@
 				</ProductKey>
 				<AcceptEula>true</AcceptEula>
 			</UserData>
-			<UseConfigurationSet>true</UseConfigurationSet>
+			<UseConfigurationSet>false</UseConfigurationSet>
 			<RunSynchronous>
 				<RunSynchronousCommand wcm:action="add">
 					<Order>1</Order>
@@ -124,6 +123,11 @@
 					<Order>5</Order>
 					<Path>reg.exe unload "HKU\DefaultUser"</Path>
 				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>6</Order>
+					<Path>%WINDIR%\Setup\Scripts\SetupComplete.cmd</Path>
+					<WillReboot>Never</WillReboot>
+				</RunSynchronousCommand>
 			</RunSynchronous>
 		</component>
 		<component name="Microsoft-Windows-Deployment" processorArchitecture="arm64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -148,6 +152,11 @@
 					<Order>5</Order>
 					<Path>reg.exe unload "HKU\DefaultUser"</Path>
 				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>6</Order>
+					<Path>%WINDIR%\Setup\Scripts\SetupComplete.cmd</Path>
+					<WillReboot>Never</WillReboot>
+				</RunSynchronousCommand>
 			</RunSynchronous>
 		</component>
 		<component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -171,6 +180,11 @@
 				<RunSynchronousCommand wcm:action="add">
 					<Order>5</Order>
 					<Path>reg.exe unload "HKU\DefaultUser"</Path>
+				</RunSynchronousCommand>
+				<RunSynchronousCommand wcm:action="add">
+					<Order>6</Order>
+					<Path>%WINDIR%\Setup\Scripts\SetupComplete.cmd</Path>
+					<WillReboot>Never</WillReboot>
 				</RunSynchronousCommand>
 			</RunSynchronous>
 		</component>
@@ -657,6 +671,16 @@ function Set-WallpaperImage {
 }
 Set-WallpaperColor -HtmlColor '#000000';
 		</File>
+		<File path="C:\Windows\Setup\Scripts\unattend-01.reg">
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\UAC\COMAutoApprovalList]
+"{ca8c87c1-929d-45ba-94db-ef8e6cb346ad}"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
+"ConsentPromptBehaviorAdmin"=dword:00000001
+"ConsentPromptBehaviorUser"=dword:00000000
+		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(
 	{
@@ -700,6 +724,9 @@ $scripts = @(
 	{
 		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation" /v DisableStartupSound /t REG_DWORD /d 1 /f;
 		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\EditionOverrides" /v UserSetting_DisableStartupSound /t REG_DWORD /d 1 /f;
+	};
+	{
+		reg.exe add "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 1 /f;
 	};
 	{
 		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d 1 /f;
@@ -774,9 +801,6 @@ $scripts = @(
 		Set-ItemProperty -LiteralPath 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'LaunchTo' -Type 'DWord' -Value 1;
 	};
 	{
-		Set-ItemProperty -LiteralPath 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Search' -Name 'SearchboxTaskbarMode' -Type 'DWord' -Value 3;
-	};
-	{
 		Set-ItemProperty -LiteralPath 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' -Name 'VisualFXSetting' -Type 'DWord' -Value 1 -Force;
 	};
 	{
@@ -829,6 +853,29 @@ $scripts = @(
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\TurnOffSystemSounds.ps1' -Raw | Invoke-Expression;
 	};
 	{
+		$names = @(
+		  'ContentDeliveryAllowed';
+		  'FeatureManagementEnabled';
+		  'OEMPreInstalledAppsEnabled';
+		  'PreInstalledAppsEnabled';
+		  'PreInstalledAppsEverEnabled';
+		  'SilentInstalledAppsEnabled';
+		  'SoftLandingEnabled';
+		  'SubscribedContentEnabled';
+		  'SubscribedContent-310093Enabled';
+		  'SubscribedContent-338387Enabled';
+		  'SubscribedContent-338388Enabled';
+		  'SubscribedContent-338389Enabled';
+		  'SubscribedContent-338393Enabled';
+		  'SubscribedContent-353698Enabled';
+		  'SystemPaneSuggestionsEnabled';
+		);
+		
+		foreach( $name in $names ) {
+		  reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v $name /t REG_DWORD /d 0 /f;
+		}
+	};
+	{
 		reg.exe add "HKU\DefaultUser\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f;
 	};
 	{
@@ -867,10 +914,10 @@ $scripts = @(
 		<File path="C:\Windows\Setup\Scripts\FirstLogon.ps1">
 $scripts = @(
 	{
-		Set-ItemProperty -LiteralPath 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'AutoLogonCount' -Type 'DWord' -Force -Value 0;
+		cmd.exe /c "rmdir C:\Windows.old";
 	};
 	{
-		cmd.exe /c "rmdir C:\Windows.old";
+		reg.exe import "C:\Windows\Setup\Scripts\unattend-01.reg";
 	};
 );
 
