@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
-	<!--https://schneegans.de/windows/unattend-generator/?LanguageMode=Interactive&ProcessorArchitecture=x86&ProcessorArchitecture=amd64&ProcessorArchitecture=arm64&BypassRequirementsCheck=true&BypassNetworkCheck=true&UseConfigurationSet=true&HidePowerShellWindows=true&ComputerNameMode=Custom&ComputerName=WINDOWS-PC&CompactOsMode=Default&TimeZoneMode=Implicit&PartitionMode=Interactive&WindowsEditionMode=Interactive&UserAccountMode=InteractiveLocal&PasswordExpirationMode=Unlimited&LockoutMode=Disabled&HideFiles=HiddenSystem&ShowFileExtensions=true&ClassicContextMenu=true&LaunchToThisPC=true&ShowEndTask=true&TaskbarSearch=Label&TaskbarIconsMode=Default&HideTaskViewButton=true&ShowAllTrayIcons=true&DisableBingResults=true&StartTilesMode=Empty&StartPinsMode=Empty&DisableWindowsUpdate=true&DisableFastStartup=true&EnableLongPaths=true&EnableRemoteDesktop=true&HardenSystemDriveAcl=true&AllowPowerShellScripts=true&PreventAutomaticReboot=true&TurnOffSystemSounds=true&DisableAppSuggestions=true&PreventDeviceEncryption=true&HideEdgeFre=true&MakeEdgeUninstallable=true&DeleteWindowsOld=true&EffectsMode=Appearance&DesktopIconsMode=Default&WifiMode=Skip&ExpressSettings=EnableAll&KeysMode=Skip&ColorMode=Default&WallpaperMode=Default&FirstLogonScript0=Windows+Registry+Editor+Version+5.00%0D%0A%0D%0A%5BHKEY_CURRENT_USER%5D%0D%0A%0D%0A%5BHKEY_CURRENT_USER%5CControl+Panel%5D%0D%0A%0D%0A%5BHKEY_CURRENT_USER%5CControl+Panel%5CDesktop%5D%0D%0A%22AutoEndTasks%22%3D%221%22%0D%0A%22HungAppTimeout%22%3D%221000%22%0D%0A%22LowLevelHooksTimeout%22%3Ddword%3A00001000%0D%0A%22MenuShowDelay%22%3D%220%22%0D%0A%22WaitToKillAppTimeout%22%3D%221000%22%0D%0A%22WaitToKillServiceTimeout%22%3Ddword%3A00001000&FirstLogonScriptType0=Reg&RestartExplorer=true&WdacMode=Skip-->
 	<settings pass="offlineServicing"></settings>
 	<settings pass="windowsPE">
 		<component name="Microsoft-Windows-Setup" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -5125,7 +5124,6 @@ Windows Registry Editor Version 5.00
 "BypassSecureBootCheck"=dword:00000001
 "BypassStorageCheck"=dword:00000001
 "BypassTPMCheck"=dword:00000001
-
 		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(
@@ -5146,10 +5144,6 @@ $scripts = @(
 	};
 	{
 		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
-	};
-	{
-		netsh.exe advfirewall firewall set rule group="@FirewallAPI.dll,-28752" new enable=Yes;
-		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f;
 	};
 	{
 		icacls.exe C:\ /remove:g "*S-1-5-11"
@@ -5293,9 +5287,6 @@ $scripts = @(
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\ShowAllTrayIcons.ps1' -Raw | Invoke-Expression;
 	};
 	{
-		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f;
-	};
-	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\TurnOffSystemSounds.ps1' -Raw | Invoke-Expression;
 	};
 	{
@@ -5356,6 +5347,9 @@ $scripts = @(
 		</File>
 		<File path="C:\Windows\Setup\Scripts\FirstLogon.ps1">
 $scripts = @(
+	{
+		Set-ItemProperty -LiteralPath 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'AutoLogonCount' -Type 'DWord' -Force -Value 0;
+	};
 	{
 		cmd.exe /c "rmdir C:\Windows.old";
 	};
