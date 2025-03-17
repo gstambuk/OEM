@@ -1,5 +1,8 @@
 Windows Registry Editor Version 5.00
 
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\lsass.exe]
+"MitigationOptions"=dword:00000031
+
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions]
 "DenyDeviceIDs"=dword:00000001
 "DenyDeviceIDsRetroactive"=dword:00000001
